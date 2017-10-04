@@ -1,6 +1,6 @@
 /* jshint expr: true, maxlen: false */
 var chai = require('chai');
-var expect = chai.expect; 
+var expect = chai.expect;
 var net = require('net');
 
 Object.assign(global, require('../src/evenWarmer.js'));
@@ -12,10 +12,10 @@ var socket;
 function mockSocket() {
 
     socket = new net.Socket({});
-    this.sinon.stub(socket, 'write').callsFake(function(s) { 
+    this.sinon.stub(socket, 'write').callsFake(function(s) {
         return s;
     });
-    this.sinon.stub(socket, 'end').callsFake(function(s) { 
+    this.sinon.stub(socket, 'end').callsFake(function(s) {
         return s;
 
     });
