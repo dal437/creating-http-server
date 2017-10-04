@@ -14,27 +14,14 @@ class Request {
     const a = news[2].split(" ")[0];
     const b = news[2].split(" ")[1];
 
-    this.headers = {};
+    const newx = x.substring(0, x.length - 1);
+    const newa = a.substring(0, a.length - 1);
 
-    /*const Obj = {};
-    const i = 0;
+    this.headers = {[newx]:y, [newa]:b};
 
-    const repeat = function (i) {
-      if (i < news.length) {
-        if (newx[s].includes("=")){
-          const newarr = newx[i].split("=");
-          Obj[newarr[0]] = newarr[1].trim();
-        }
-        repeat(i+1);
-      }
-    };*/
 
     console.log(this.method);
     console.log(this.path);
-    console.log(x);
-    console.log(y);
-    console.log(a);
-    console.log(b);
     console.log(this.headers);
   }
 }
