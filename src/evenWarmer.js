@@ -45,24 +45,45 @@ class Request {
   }
 }
 
+class Response {
+  constructor(socket){
+    this.sock = socket;
+    this.headers = {};
+    this.body = '';
+    this.statusCode = 0
+  }
 
-const PORT = 8080;
-const HOST = '127.0.0.1';
+  setHeader(name, value) {
+    this.headers[name] = value;
+  }
 
+  write(data) {
+    this.sock.write(data);
+  }
 
-const server = net.createServer((sock) => {
-  console.log('client connected:', sock.remoteAddress, sock.remotePort);
-  sock.on('data', (receivedData) => { applyingData(sock, receivedData); });
-});
+  end(s) {
+    this.sock.end(s);
+  }
 
+  /*send(statusCode, body){
 
-function applyingData(sock, receivedData) {
-  console.log("server is handling call");
-  sock.write(`HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<em>hello</em> <strong>world</strong>`);
-  sock.end();
+  }
+
+  writeHead(statusCode){
+
+  }
+
+  redirect(statusCode, url){
+
+  }
+
+  toString(){
+
+  }
+
+  sendFile(fileName){
+
+  }*/
 }
 
-server.listen(PORT, HOST);
-console.log("server is listening");
-
-module.exports = {Request};
+module.exports = {Request, Response};
