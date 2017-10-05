@@ -1,16 +1,21 @@
 //evenWarmer.js
 
 const net = require('net');
-
+const fs = require('fs');
+const path = require('path');
 
 class Request {
   constructor(httpRequest){
     this.httpRequest = httpRequest;
-    const news = httpRequest.split('\r\n');
+    this.headers = {};
+    if (!httpRequest){
+      return;
+    }
+    const news = httpRequest.toString().split('\r\n');
     this.method = news[0].split(" ")[0];
     this.path = news[0].split(" ")[1];
 
-    const headers = {};
+
     const hostIndex = 1;
 
     let refererIndex = 2;
@@ -26,16 +31,15 @@ class Request {
     const x = news[hostIndex].split(" ")[0];
     const newx = x.substring(0, x.length - 1);
     const y = news[hostIndex].split(" ")[1];
-    headers[newx] = y;
+    this.headers[newx] = y;
 
     if (refererIndex > 0) {
       const a = news[refererIndex].split(' ')[0];
       const newa = a.substring(0, a.length - 1);
       const b = news[refererIndex].split(' ')[1];
 
-      headers[newa] = b;
+      this.headers[newa] = b;
     }
-    this.headers = headers;
     this.body = news[bodyIndex];
   }
 
@@ -49,8 +53,8 @@ class Response {
   constructor(socket){
     this.sock = socket;
     this.headers = {};
-    this.body = '';
-    this.statusCode = 0
+    this.body = socket.body;
+    this.statusCode = socket.statusCode;
   }
 
   setHeader(name, value) {
@@ -62,28 +66,97 @@ class Response {
   }
 
   end(s) {
+    console.log(this.sock);
+    console.log('this', this);
     this.sock.end(s);
   }
 
-  /*send(statusCode, body){
-
+  send(statusCode, body){
+    this.body = body;
+    this.statusCode = statusCode;
+    this.sock.end(body);
   }
 
   writeHead(statusCode){
-
+    this.statusCode = statusCode;
+    this.sock.write(statusCode.toString());
   }
 
   redirect(statusCode, url){
-
+    if(typeof statusCode === "number"){
+      this.statusCode = statusCode;
+      this.setHeader('Location', url);
+    }
+    else{
+      this.statusCode = "301";
+      this.headers['Location'] = url;
+    }
+    //this.end(createResponse(this.statusCode, this.body))
+    //hard code createResponse;
+    this.end()
   }
 
   toString(){
+    const validobj = {
+      "200": "OK",
+      "404": "Not Found",
+      "500": "Internal Server Error",
+      "400": "Bad Request",
+      "301": "Moved Permanently",
+      "302": "Found",
+      "303": "See Other",
+    }
 
+    let availableStr = '';
+
+    availableStr = availableStr + "HTTP/1.1" + ' ' + this.statusCode + ' ' + validobj[this.statusCode] + '\r\n';
+
+    for (let x in this.headers){
+      availableStr = availableStr + x + ": " + this.headers[x] + '\r\n';
+    }
+
+    availableStr = availableStr + '\r\n';
+
+    if (this.body !== undefined){
+      availableStr = availableStr + this.body;
+    }
+
+    return availableStr;
   }
 
   sendFile(fileName){
 
-  }*/
+    const objects = {
+      jpeg: 'image/jpeg',
+      jpg: 'image/jpeg',
+      png: 'image/png',
+      gif: 'image/gif',
+      html: 'text/html',
+      css: 'text/css',
+      txt: 'text/plain',
+    };
+
+    const readOptions = {};
+    const p = path.join(__dirname, 'public', fileName);
+
+    const [file, extension] = fileName.split('.');
+    if (extension === "txt" || extension === "html"){
+      readOptions.encoding = "utf8";
+    }
+
+    fs.readFile(fileName, readOptions, (err, data) => {
+      if (err){
+        this.writeHead(500);
+        return this.end();
+      }
+
+      this.setHeader({
+        'Content-Type': objects[extension],
+      });
+      return this.send(200, data);
+    });
+  }
 }
+
 
 module.exports = {Request, Response};
