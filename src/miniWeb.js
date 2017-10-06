@@ -7,6 +7,7 @@ const net = require('net');
 const PORT = 8080;
 const HOST = '127.0.0.1';
 
+const path = require('path');
 
 class App {
   constructor(){
@@ -27,7 +28,6 @@ class App {
     if (!request.headers['Host']){
       response.writeHead(400);
       return response.end();
-      //skipped #4 - easy one
     }
     if (!this.routes[request.path]){
       if((request.path).length - 1 === '/'){
@@ -36,10 +36,11 @@ class App {
       response.writeHead(404 + " Not Found");
       return response.end();
     }
-    return this.routes[request.path](request, response);
+    sock.on('close', this.logResponse.bind(this, this.req, this.res));
+    this.routes[request.path](request, response);
   }
   logResponse(req, res){
-    //sock.on('close', this.logResponse.bind(this, req, res));
+    //console.log(req.path + ' ' + req.method + ' ');
   }
   listen(port, host){
     this.server.listen(port, host);

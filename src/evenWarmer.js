@@ -4,12 +4,6 @@ const net = require('net');
 const fs = require('fs');
 const path = require('path');
 
-function createResponse(status, body) {
-  return `HTTP/1.1 ${status} OK
-  Content-Type: text/html
-  ${body}`;
-}
-
 class Request {
   constructor(httpRequest){
     this.httpRequest = httpRequest;
@@ -97,7 +91,7 @@ class Response {
       this.statusCode = "301";
       this.headers['Location'] = url;
     }
-    this.end(createResponse(this.statusCode, this.body));
+    this.send(this.statusCode, this.body);
   }
 
   toString(){
