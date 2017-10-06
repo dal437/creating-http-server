@@ -4,6 +4,12 @@ const net = require('net');
 const fs = require('fs');
 const path = require('path');
 
+function createResponse(status, body) {
+  return `HTTP/1.1 ${status} OK
+  Content-Type: text/html
+  ${body}`;
+}
+
 class Request {
   constructor(httpRequest){
     this.httpRequest = httpRequest;
@@ -74,7 +80,7 @@ class Response {
   send(statusCode, body){
     this.body = body;
     this.statusCode = statusCode;
-    this.sock.end(body);
+    this.sock.end(this.toString());
   }
 
   writeHead(statusCode){
@@ -87,13 +93,11 @@ class Response {
       this.statusCode = statusCode;
       this.setHeader('Location', url);
     }
-    else{
+    else {
       this.statusCode = "301";
       this.headers['Location'] = url;
     }
-    //this.end(createResponse(this.statusCode, this.body))
-    //hard code createResponse;
-    this.end()
+    this.end(createResponse(this.statusCode, this.body));
   }
 
   toString(){
@@ -118,7 +122,7 @@ class Response {
     availableStr = availableStr + '\r\n';
 
     if (this.body !== undefined){
-      availableStr = availableStr + this.body;
+      availableStr = availableStr + this.body.toString();
     }
 
     return availableStr;
@@ -140,7 +144,7 @@ class Response {
     const p = path.join(__dirname, 'public', fileName);
 
     const [file, extension] = fileName.split('.');
-    if (extension === "txt" || extension === "html"){
+    if (extension === "txt" || extension === "html" || extension === "css"){
       readOptions.encoding = "utf8";
     }
 

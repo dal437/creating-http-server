@@ -4,6 +4,9 @@ const BringBackReq = require('./evenWarmer').Request;
 const BringBackRes = require('./evenWarmer').Response;
 
 const net = require('net');
+const PORT = 8080;
+const HOST = '127.0.0.1';
+
 
 class App {
   constructor(){
@@ -27,23 +30,22 @@ class App {
       //skipped #4 - easy one
     }
     if (!this.routes[request.path]){
-      //Look at #6, make sure to take into account extra slash; another if statement
-      response.writeHead(404);
+      if((request.path).length - 1 === '/'){
+        request.path.slice('/');
+      }
+      response.writeHead(404 + " Not Found");
       return response.end();
     }
     return this.routes[request.path](request, response);
   }
   logResponse(req, res){
-
+    //sock.on('close', this.logResponse.bind(this, req, res));
   }
   listen(port, host){
     this.server.listen(port, host);
   }
 }
 
-
-const app = new App();
-app.get("/giwah", (req, res) => {
-  res.send(200, "Hi :)")
-});
-app.listen(80, '127.0.0.1');
+module.exports = {
+  App:App
+};
